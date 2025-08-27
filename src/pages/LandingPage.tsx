@@ -275,9 +275,6 @@ const LandingPage: React.FC = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Transform Your Financial Life?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Join thousands of users who have already taken control of their finances with FinanceTracker.
-          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/register"
@@ -344,7 +341,7 @@ const LandingPage: React.FC = () => {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 FinanceTracker. All rights reserved.</p>
+            <p>&copy; 2025 FinanceTracker. All rights reserved.</p>
           </div>
         </div>
       </footer>
