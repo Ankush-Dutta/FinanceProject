@@ -21,8 +21,8 @@ const Layout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   React.useEffect(() => {
-    if (user && !user.profileComplete && location.pathname !== '/profile-setup') {
-      navigate('/profile-setup');
+    if (user && !user.profileComplete && location.pathname !== '/app/profile-setup') {
+      navigate('/app/profile-setup');
     }
   }, [user, location.pathname, navigate]);
 
@@ -32,12 +32,12 @@ const Layout: React.FC = () => {
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Tax Calculator', href: '/tax', icon: Calculator },
-    { name: 'Loan Management', href: '/loans', icon: CreditCard },
-    { name: 'Asset Management', href: '/assets', icon: TrendingUp },
-    { name: 'Currency Converter', href: '/currency', icon: DollarSign },
-    { name: 'Insurance', href: '/insurance', icon: Shield },
+    { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+    { name: 'Tax Calculator', href: '/app/tax', icon: Calculator },
+    { name: 'Loan Management', href: '/app/loans', icon: CreditCard },
+    { name: 'Asset Management', href: '/app/assets', icon: TrendingUp },
+    { name: 'Currency Converter', href: '/app/currency', icon: DollarSign },
+    { name: 'Insurance', href: '/app/insurance', icon: Shield },
   ];
 
   return (

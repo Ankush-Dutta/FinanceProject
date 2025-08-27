@@ -29,7 +29,7 @@ const ProfileSetup: React.FC = () => {
     setLoading(true);
     try {
       updateProfile(formData);
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     } catch (error) {
       console.error('Profile setup failed:', error);
     } finally {

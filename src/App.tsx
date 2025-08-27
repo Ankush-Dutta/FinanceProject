@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import Layout from './components/Layout';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfileSetup from './pages/ProfileSetup';
@@ -22,9 +23,10 @@ function App() {
         <Router>
           <div className="min-h-screen bg-gray-50">
             <Routes>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+              <Route path="/app" element={<PrivateRoute><Layout /></PrivateRoute>}>
                 <Route index element={<Dashboard />} />
                 <Route path="profile-setup" element={<ProfileSetup />} />
                 <Route path="dashboard" element={<Dashboard />} />
@@ -33,7 +35,7 @@ function App() {
                 <Route path="assets" element={<AssetManagement />} />
                 <Route path="currency" element={<CurrencyConverter />} />
                 <Route path="insurance" element={<Insurance />} />
-               <Route path="add-transaction" element={<AddTransaction />} />
+                <Route path="add-transaction" element={<AddTransaction />} />
               </Route>
             </Routes>
           </div>

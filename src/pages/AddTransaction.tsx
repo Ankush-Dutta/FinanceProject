@@ -68,7 +68,7 @@ const AddTransaction: React.FC = () => {
     });
 
     // Navigate back to dashboard
-    navigate('/dashboard');
+    navigate('/app/dashboard');
   };
 
   const categories = formData.type === 'income' ? incomeCategories : expenseCategories;
@@ -77,7 +77,7 @@ const AddTransaction: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/app/dashboard')}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="h-5 w-5 text-gray-600" />
@@ -222,7 +222,7 @@ const AddTransaction: React.FC = () => {
             <div className="flex gap-4 pt-6">
               <button
                 type="button"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/app/dashboard')}
                 className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
               >
                 Cancel

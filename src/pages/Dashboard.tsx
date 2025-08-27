@@ -123,7 +123,7 @@ const Dashboard: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <div className="flex items-center gap-4">
           <Link
-            to="/add-transaction"
+            to="/app/add-transaction"
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
@@ -208,7 +208,7 @@ const Dashboard: React.FC = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
@@ -238,7 +238,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">Recent Transactions</h3>
             <Link
-              to="/add-transaction"
+              to="/app/add-transaction"
               className="text-blue-600 hover:text-blue-700 text-sm font-medium"
             >
               Add Transaction
@@ -304,7 +304,7 @@ const Dashboard: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">No Transactions Yet</h3>
             <p className="mb-4">Start tracking your finances by adding your first transaction</p>
             <Link
-              to="/add-transaction"
+              to="/app/add-transaction"
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />

@@ -21,7 +21,7 @@ const Register: React.FC = () => {
     setLoading(true);
     try {
       await register(email, password, name);
-      navigate('/profile-setup');
+      navigate('/app/profile-setup');
     } catch (error) {
       console.error('Registration failed:', error);
     } finally {
