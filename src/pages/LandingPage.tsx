@@ -84,7 +84,7 @@ const LandingPage: React.FC = () => {
               <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <BarChart3 className="h-5 w-5 text-white" />
               </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">FinanceTracker</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">SpendMate</span>
             </div>
             <div className="flex items-center space-x-4">
               <Link
@@ -169,7 +169,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose FinanceTracker?
+              Why Choose SpendMate?
             </h2>
             <p className="text-xl text-gray-600">
               Built with modern technology and user experience in mind.
@@ -225,7 +225,7 @@ const LandingPage: React.FC = () => {
             Ready to Transform Your Financial Life?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of users who have already taken control of their finances with FinanceTracker.
+            Join thousands of users who have already taken control of their finances with SpendMate
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -254,7 +254,7 @@ const LandingPage: React.FC = () => {
                 <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <BarChart3 className="h-5 w-5 text-white" />
                 </div>
-                <span className="ml-2 text-xl font-bold">FinanceTracker</span>
+                <span className="ml-2 text-xl font-bold">SpendMate</span>
               </div>
               <p className="text-gray-400">
                 The complete solution for managing your personal finances and achieving your financial goals.
@@ -293,7 +293,7 @@ const LandingPage: React.FC = () => {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 FinanceTracker. All rights reserved.</p>
+            <p>&copy; 2025 SpendMate. All rights reserved.</p>
           </div>
         </div>
       </footer>

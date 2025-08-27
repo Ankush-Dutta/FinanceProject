@@ -40,7 +40,7 @@ const Register: React.FC = () => {
             Create Account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Join FinanceTracker to manage your finances
+            Join SpendMate to manage your finances
           </p>
         </div>
         <form className="mt-8 space-y-6 bg-white p-8 rounded-xl shadow-lg" onSubmit={handleSubmit}>

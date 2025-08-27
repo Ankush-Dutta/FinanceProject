@@ -34,7 +34,7 @@ const Login: React.FC = () => {
             Welcome Back
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Sign in to your FinanceTracker account
+            Sign in to your SpendMate account
           </p>
         </div>
         <form className="mt-8 space-y-6 bg-white p-8 rounded-xl shadow-lg" onSubmit={handleSubmit}>
