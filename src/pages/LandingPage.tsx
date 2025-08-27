@@ -145,9 +145,6 @@ const LandingPage: React.FC = () => {
                 Start Free Today
                 <ArrowRight className="h-5 w-5" />
               </Link>
-              <button className="border border-gray-300 text-gray-700 px-8 py-4 rounded-lg hover:bg-gray-50 transition-colors font-semibold">
-                Watch Demo
-              </button>
             </div>
             <p className="text-sm text-gray-500 mt-4">
               No credit card required • Free forever • Setup in 2 minutes
