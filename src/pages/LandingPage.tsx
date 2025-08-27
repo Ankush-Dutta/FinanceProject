@@ -10,7 +10,6 @@ import {
   TrendingUp,
   Users,
   CheckCircle,
-  Star,
   Smartphone,
   Lock,
   Zap
@@ -74,26 +73,6 @@ const LandingPage: React.FC = () => {
     }
   ];
 
-  const testimonials = [
-    {
-      name: 'Priya Sharma',
-      role: 'Software Engineer',
-      content: 'FinanceTracker has completely transformed how I manage my money. The tax calculator alone saved me thousands!',
-      rating: 5
-    },
-    {
-      name: 'Rajesh Kumar',
-      role: 'Business Owner',
-      content: 'Managing multiple loans was a nightmare until I found this app. Now everything is organized and clear.',
-      rating: 5
-    },
-    {
-      name: 'Anita Patel',
-      role: 'Financial Advisor',
-      content: 'I recommend FinanceTracker to all my clients. It\'s the most comprehensive finance app I\'ve seen.',
-      rating: 5
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -145,6 +124,9 @@ const LandingPage: React.FC = () => {
                 Start Free Today
                 <ArrowRight className="h-5 w-5" />
               </Link>
+              <button className="border border-gray-300 text-gray-700 px-8 py-4 rounded-lg hover:bg-gray-50 transition-colors font-semibold">
+                Watch Demo
+              </button>
             </div>
             <p className="text-sm text-gray-500 mt-4">
               No credit card required • Free forever • Setup in 2 minutes
@@ -235,36 +217,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Loved by Thousands of Users
-            </h2>
-            <p className="text-xl text-gray-600">
-              See what our users have to say about their experience.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 p-8 rounded-xl">
-                <div className="flex mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-6 italic">"{testimonial.content}"</p>
-                <div>
-                  <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                  <div className="text-gray-500 text-sm">{testimonial.role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
@@ -272,6 +224,9 @@ const LandingPage: React.FC = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Transform Your Financial Life?
           </h2>
+          <p className="text-xl text-blue-100 mb-8">
+            Join thousands of users who have already taken control of their finances with FinanceTracker.
+          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/register"
