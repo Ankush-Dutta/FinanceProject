@@ -13,6 +13,9 @@ import {
   Lock,
   Zap
 } from 'lucide-react';
+// Ensure you have this image in the specified path
+import LandingPageBg from '../assets/LandingPageBg.jpg';
+
 
 const LandingPage: React.FC = () => {
   // Data for the Features section
@@ -147,14 +150,14 @@ const LandingPage: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      {/* Note: You must manually replace the background URL and set up your Tailwind config. */}
       <motion.section 
         className="relative py-20 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('LandingPageBg.jpg'` }}
+        style={{ backgroundImage: `url(${LandingPageBg})` }}
         initial="hidden"
         animate="show"
         variants={containerVariants}
       >
+
         {/* Overlay to ensure text readability */}
         <div className="absolute inset-0 bg-black opacity-60"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
