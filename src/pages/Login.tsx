@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock } from 'lucide-react';
-import LoginImage2 from '../assets/LoginPage2.jpg';
+import LoginImage from '../assets/LoginPage2.jpg';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -30,7 +30,7 @@ const Login: React.FC = () => {
   return (
     <div
       className="min-h-screen bg-cover bg-center flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-      style={{ backgroundImage: `url(${LoginImage2})` }}
+      style={{ backgroundImage: `url(${LoginImage})` }}
     >
       {/* Semi-transparent overlay for improved text readability */}
       <div className="absolute inset-0 bg-black opacity-50" />
