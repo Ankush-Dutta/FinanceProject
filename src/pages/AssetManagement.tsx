@@ -1,3 +1,4 @@
+// src/pages/AssetManagement.tsx
 import React, { useState } from 'react';
 import { useData } from '../contexts/DataContext';
 import { TrendingUp, Plus, Trash2, Wallet, CreditCard, PiggyBank, BarChart3 } from 'lucide-react';
