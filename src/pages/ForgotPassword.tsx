@@ -1,10 +1,8 @@
-// src/pages/ForgotPassword.tsx
 import React, { useMemo, useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, ShieldCheck, Lock, ArrowLeft } from "lucide-react";
 import ForgotPasswordBg from "../assets/ForgotPasswordBg.mp4"; // ✅ import your mp4
 
-// --- Mock service (replace with real API later) ---
 const mockAuth = {
   sendOtp: async (email: string): Promise<string> => {
     await new Promise((r) => setTimeout(r, 600));
