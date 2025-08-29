@@ -14,7 +14,8 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 800)); // simulate auth
+      // TODO: replace with real authentication
+      await new Promise((r) => setTimeout(r, 800));
       navigate("/app/dashboard");
     } finally {
       setLoading(false);
@@ -40,8 +41,12 @@ const Login = () => {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 shadow-lg">
               <LogIn className="h-6 w-6 text-white" />
             </div>
-            <h2 className="mt-6 text-3xl font-extrabold text-white">Welcome Back</h2>
-            <p className="mt-2 text-sm text-gray-200">Sign in to your SpendMate account</p>
+            <h2 className="mt-6 text-3xl font-extrabold text-white">
+              Welcome Back
+            </h2>
+            <p className="mt-2 text-sm text-gray-200">
+              Sign in to your SpendMate account
+            </p>
           </div>
 
           <form
@@ -50,7 +55,10 @@ const Login = () => {
           >
             <div className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Email address
                 </label>
                 <div className="relative mt-1">
@@ -69,7 +77,10 @@ const Login = () => {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Password
                 </label>
                 <div className="relative mt-1">
@@ -85,6 +96,15 @@ const Login = () => {
                     autoComplete="current-password"
                   />
                 </div>
+
+                <div className="mt-2 text-right">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -98,7 +118,10 @@ const Login = () => {
 
             <p className="text-center text-sm text-gray-600">
               Don&apos;t have an account?{" "}
-              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link
+                to="/register"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
                 Sign up
               </Link>
             </p>
