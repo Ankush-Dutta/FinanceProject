@@ -21,13 +21,11 @@ const Register: React.FC = () => {
     }
     setLoading(true);
     try {
-      await register(email, password, name);
-      navigate('/app/profile-setup');
+    await register(email, password, name);
+    navigate("/otp", { state: { email } });   // ✅ send email to OTP page
     } catch (error) {
-      console.error('Registration failed:', error);
-    } finally {
-      setLoading(false);
-    }
+  console.error("Registration failed:", error);
+  alert("Registration failed. Please try again.");}
   };
 
   return (

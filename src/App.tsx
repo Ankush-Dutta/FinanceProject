@@ -16,6 +16,7 @@ import CurrencyConverter from "./pages/CurrencyConverter";
 import Insurance from "./pages/Insurance";
 import AddTransaction from "./pages/AddTransaction";
 import PrivateRoute from "./components/PrivateRoute";
+import OTPVerification from "./pages/OTPVerification";
 
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetSuccess   = lazy(() => import("./pages/ResetSuccess"));
@@ -33,6 +34,7 @@ export default function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/otp" element={<OTPVerification />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-success" element={<ResetSuccess />} />
 
