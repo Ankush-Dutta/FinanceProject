@@ -10,7 +10,7 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { requestOTP } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,11 +21,23 @@ const Register: React.FC = () => {
     }
     setLoading(true);
     try {
-    await register(email, password, name);
-    navigate("/otp", { state: { email } });   // ✅ send email to OTP page
+      // Request OTP for the email
+      const otpToken = await requestOTP(email);
+      // Navigate to OTP page with user data and token
+      navigate("/otp", { 
+        state: { 
+          email, 
+          otpToken, 
+          userData: { name, email, password } 
+        } 
+      });
     } catch (error) {
-  console.error("Registration failed:", error);
-  alert("Registration failed. Please try again.");}
+      console.error("Failed to send OTP:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to send OTP. Please try again.";
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -140,7 +152,7 @@ const Register: React.FC = () => {
               disabled={loading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
           </div>
 
