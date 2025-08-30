@@ -1,31 +1,72 @@
 // src/pages/OTPVerification.tsx
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { Shield } from "lucide-react";
 import OtpBg from "../assets/OTPVerificationPage.mp4"; 
 
 const OTPVerification: React.FC = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { verifyOTPAndRegister, requestOTP } = useAuth();
 
-  const email = (location.state as { email?: string })?.email;
+  const state = location.state as { 
+    email?: string; 
+    otpToken?: string; 
+    userData?: { name: string; email: string; password: string } 
+  };
+  
+  const email = state?.email;
+  const [currentOtpToken, setCurrentOtpToken] = useState(state?.otpToken);
+  const userData = state?.userData;
+
+  const handleResendOTP = async () => {
+    if (!email || !userData) {
+      alert("Missing registration data. Please start registration again.");
+      navigate("/register");
+      return;
+    }
+
+    setResendLoading(true);
+    try {
+      const newOtpToken = await requestOTP(email);
+      setCurrentOtpToken(newOtpToken);
+      alert("New OTP sent successfully!");
+    } catch (error) {
+      console.error("Failed to resend OTP:", error);
+      alert("Failed to resend OTP. Please try again.");
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!currentOtpToken || !userData) {
+      alert("Missing registration data. Please start registration again.");
+      navigate("/register");
+      return;
+    }
+    
+    if (!otp || otp.length !== 6) {
+      alert("Please enter a valid 6-digit OTP.");
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      // ✅ In real app: validate OTP with backend
-      if (otp === "123456") {
-        alert("OTP Verified Successfully!");
-        navigate("/app/profile-setup");
-      } else {
-        alert("Invalid OTP. Please try again.");
-      }
-    } catch (error) {
-      console.error("OTP verification failed:", error);
+      await verifyOTPAndRegister(otp, currentOtpToken, userData);
+      alert("Registration successful! Welcome to SpendMate!");
+      navigate("/app/profile-setup");
+    } catch (error: unknown) {
+      console.error("OTP verification and registration failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "OTP verification failed. Please try again.";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -94,13 +135,14 @@ const OTPVerification: React.FC = () => {
         </form>
 
         <p className="text-center text-sm text-gray-300">
-          Didn’t get the code?{" "}
+          Didn't get the code?{" "}
           <button
             type="button"
-            onClick={() => alert("Resend OTP clicked")}
-            className="text-green-400 hover:underline"
+            onClick={handleResendOTP}
+            disabled={resendLoading}
+            className="text-green-400 hover:underline disabled:opacity-50"
           >
-            Resend
+            {resendLoading ? "Sending..." : "Resend"}
           </button>
         </p>
       </div>
