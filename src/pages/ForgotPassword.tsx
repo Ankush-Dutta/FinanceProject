@@ -1,46 +1,9 @@
 import React, { useMemo, useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, ShieldCheck, Lock, ArrowLeft } from "lucide-react";
-import ForgotPasswordBg from "../assets/ForgotPasswordBg.mp4"; // ✅ import your mp4
+import ForgotPasswordBg from "../assets/ForgotPasswordBg.mp4"; 
 
-const mockAuth = {
-  sendOtp: async (email: string): Promise<string> => {
-    await new Promise((r) => setTimeout(r, 600));
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const map: Record<string, { otp: string; issuedAt: number }> = JSON.parse(
-      localStorage.getItem("_otp_map") || "{}"
-    );
-    map[email] = { otp, issuedAt: Date.now() };
-    localStorage.setItem("_otp_map", JSON.stringify(map));
-    return otp;
-  },
-  verifyOtp: async (email: string, code: string): Promise<boolean> => {
-    await new Promise((r) => setTimeout(r, 400));
-    const map: Record<string, { otp: string; issuedAt: number }> = JSON.parse(
-      localStorage.getItem("_otp_map") || "{}"
-    );
-    const rec = map[email];
-    if (!rec) throw new Error("OTP not requested for this email.");
-    const expired = Date.now() - rec.issuedAt > 5 * 60 * 1000;
-    if (expired) throw new Error("OTP expired. Please request a new one.");
-    if (rec.otp !== code) throw new Error("Invalid OTP.");
-    return true;
-  },
-  resetPassword: async (email: string, newPassword: string): Promise<boolean> => {
-    await new Promise((r) => setTimeout(r, 500));
-    const users: Record<string, { password: string }> = JSON.parse(
-      localStorage.getItem("_users_demo") || "{}"
-    );
-    users[email] = { ...(users[email] || {}), password: newPassword };
-    localStorage.setItem("_users_demo", JSON.stringify(users));
-    const map: Record<string, { otp: string; issuedAt: number }> = JSON.parse(
-      localStorage.getItem("_otp_map") || "{}"
-    );
-    delete map[email];
-    localStorage.setItem("_otp_map", JSON.stringify(map));
-    return true;
-  },
-};
+const API_BASE = "http://127.0.0.1:5000"; // Flask backend URL
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -60,15 +23,19 @@ const ForgotPassword: React.FC = () => {
 
   const handleSendOtp = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
-    setLoading(true);
+    setError(""); setMessage(""); setLoading(true);
     try {
-      await mockAuth.sendOtp(email);
-      setMessage("OTP sent to your email (demo: stored locally). Valid for 5 minutes.");
+      const res = await fetch(`${API_BASE}/password/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+      setMessage("OTP sent to your email. Valid for 5 minutes.");
       setStep(2);
     } catch (err: any) {
-      setError(err.message || "Failed to send OTP");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -76,15 +43,19 @@ const ForgotPassword: React.FC = () => {
 
   const handleVerifyOtp = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
-    setLoading(true);
+    setError(""); setMessage(""); setLoading(true);
     try {
-      await mockAuth.verifyOtp(email, otp);
+      const res = await fetch(`${API_BASE}/password/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Invalid OTP");
       setMessage("OTP verified. You can set a new password.");
       setStep(3);
     } catch (err: any) {
-      setError(err.message || "Invalid OTP");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -93,15 +64,19 @@ const ForgotPassword: React.FC = () => {
   const handleResetPassword = async (e: FormEvent) => {
     e.preventDefault();
     if (!canSubmitPassword) return;
-    setError("");
-    setMessage("");
-    setLoading(true);
+    setError(""); setMessage(""); setLoading(true);
     try {
-      await mockAuth.resetPassword(email, password);
+      const res = await fetch(`${API_BASE}/password/reset`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to reset password");
       setMessage("Password updated successfully. Redirecting to login...");
-      setTimeout(() => navigate("/login"), 1000);
+      setTimeout(() => navigate("/login"), 1200);
     } catch (err: any) {
-      setError(err.message || "Failed to reset password");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -113,21 +88,16 @@ const ForgotPassword: React.FC = () => {
       <video
         className="absolute inset-0 h-full w-full object-cover"
         src={ForgotPasswordBg}
-        autoPlay
-        loop
-        muted
-        playsInline
+        autoPlay loop muted playsInline
       />
-      {/* Overlay for readability */}
       <div className="absolute inset-0 bg-black/50" />
 
-      {/* Foreground content */}
+      {/* Foreground */}
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-6 flex items-center gap-3 text-white">
           <button
             onClick={() => navigate(-1)}
             className="rounded-full p-2 hover:bg-white/10"
-            aria-label="Go back"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
@@ -138,16 +108,13 @@ const ForgotPassword: React.FC = () => {
           {/* STEP 1: Email */}
           {step === 1 && (
             <form onSubmit={handleSendOtp} className="space-y-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Registered email
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Registered email</label>
               <div className="relative mt-1">
-                <Mail className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
-                  id="email"
                   type="email"
                   required
-                  className="block w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-lg border py-3 pl-10 pr-3 text-gray-900"
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -166,17 +133,14 @@ const ForgotPassword: React.FC = () => {
           {/* STEP 2: OTP */}
           {step === 2 && (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
-                Enter OTP
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Enter OTP</label>
               <div className="relative mt-1">
-                <ShieldCheck className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <ShieldCheck className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
-                  id="otp"
                   inputMode="numeric"
                   maxLength={6}
                   required
-                  className="block w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 text-gray-900 tracking-widest focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-lg border py-3 pl-10 pr-3 text-gray-900 tracking-widest"
                   placeholder="000000"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
@@ -192,42 +156,30 @@ const ForgotPassword: React.FC = () => {
             </form>
           )}
 
-          {/* STEP 3: Reset password */}
+          {/* STEP 3: Reset Password */}
           {step === 3 && (
             <form onSubmit={handleResetPassword} className="space-y-4">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                New password
-              </label>
-              <div className="relative mt-1">
-                <Lock className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  id="password"
-                  type="password"
-                  minLength={8}
-                  required
-                  className="block w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 text-gray-900"
-                  placeholder="At least 8 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
+              <label className="block text-sm font-medium text-gray-700">New password</label>
+              <input
+                type="password"
+                minLength={8}
+                required
+                className="block w-full rounded-lg border py-3 pl-3 text-gray-900"
+                placeholder="At least 8 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
 
-              <label htmlFor="confirm" className="block text-sm font-medium text-gray-700">
-                Confirm new password
-              </label>
-              <div className="relative mt-1">
-                <Lock className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  id="confirm"
-                  type="password"
-                  minLength={8}
-                  required
-                  className="block w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 text-gray-900"
-                  placeholder="Re-enter new password"
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                />
-              </div>
+              <label className="block text-sm font-medium text-gray-700">Confirm new password</label>
+              <input
+                type="password"
+                minLength={8}
+                required
+                className="block w-full rounded-lg border py-3 pl-3 text-gray-900"
+                placeholder="Re-enter new password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+              />
 
               <button
                 type="submit"
