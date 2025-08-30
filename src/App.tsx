@@ -17,7 +17,6 @@ import Insurance from "./pages/Insurance";
 import AddTransaction from "./pages/AddTransaction";
 import PrivateRoute from "./components/PrivateRoute";
 
-// ✅ Lazy-load these to avoid hard crashes if the file fails to compile
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetSuccess   = lazy(() => import("./pages/ResetSuccess"));
 
@@ -34,7 +33,6 @@ export default function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                {/* ✅ Keep forgot/reset OUTSIDE the /app PrivateRoute */}
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-success" element={<ResetSuccess />} />
 
@@ -57,8 +55,6 @@ export default function App() {
                   <Route path="insurance" element={<Insurance />} />
                   <Route path="add-transaction" element={<AddTransaction />} />
                 </Route>
-
-                {/* Tiny health check route (optional) */}
                 <Route path="/ping" element={<div className="p-6">pong</div>} />
               </Routes>
             </div>
