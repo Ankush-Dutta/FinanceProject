@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 interface User {
   id: string;
@@ -15,6 +15,8 @@ interface AuthContextType {
   verifyOTPAndRegister: (otp: string, otpToken: string, userData: { name: string; email: string; password: string }) => Promise<void>;
   logout: () => void;
   updateProfile: (data: Record<string, unknown>) => void;
+  refreshToken: () => Promise<boolean>;
+  getAuthToken: () => string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,21 +34,186 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
-    if (savedUser) {
+    const token = localStorage.getItem('authToken');
+    
+    if (savedUser && token) {
       setUser(JSON.parse(savedUser));
+      // You could validate the token here if needed
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // Simulate API call
-    const mockUser: User = {
-      id: '1',
-      email,
-      name: email.split('@')[0],
-      profileComplete: localStorage.getItem('profileComplete') === 'true'
+  const getAuthToken = useCallback((): string | null => {
+    return localStorage.getItem('authToken');
+  }, []);
+
+  const logout = useCallback(() => {
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('profileComplete');
+    localStorage.removeItem('profileData');
+  }, []);
+
+  const refreshToken = useCallback(async (): Promise<boolean> => {
+    try {
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+      if (!storedRefreshToken) {
+        return false;
+      }
+
+      const response = await fetch('https://spendmate.shubhodip.in/users/refresh-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'Meowmeowmeow123456789'
+        },
+        body: JSON.stringify({
+          refreshToken: storedRefreshToken
+        }),
+      });
+
+      if (!response.ok) {
+        // Refresh token is invalid, logout user
+        logout();
+        return false;
+      }
+
+      const data = await response.json();
+      localStorage.setItem('authToken', data.token);
+      console.log('Token refreshed successfully');
+      return true;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      logout();
+      return false;
+    }
+  }, [logout]);
+
+  // Auto refresh token every 25 minutes
+  useEffect(() => {
+    let refreshInterval: number | null = null;
+
+    const startTokenRefresh = () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+
+      // Refresh token every 25 minutes (25 * 60 * 1000 milliseconds)
+      refreshInterval = setInterval(async () => {
+        const token = getAuthToken();
+        const refreshTokenValue = localStorage.getItem('refreshToken');
+        
+        if (token && refreshTokenValue && user) {
+          console.log('Auto-refreshing token (25 minute interval)...');
+          try {
+            const success = await refreshToken();
+            if (success) {
+              console.log('Token auto-refreshed successfully');
+            } else {
+              console.log('Auto token refresh failed, stopping interval');
+              if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+              }
+            }
+          } catch (error) {
+            console.error('Error during auto token refresh:', error);
+            if (refreshInterval) {
+              clearInterval(refreshInterval);
+              refreshInterval = null;
+            }
+          }
+        } else {
+          console.log('No valid session found, stopping token refresh interval');
+          if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+          }
+        }
+      }, 25 * 60 * 1000) as unknown as number; // 25 minutes
     };
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
+
+    // Start the refresh interval when user is logged in
+    if (user && getAuthToken() && localStorage.getItem('refreshToken')) {
+      startTokenRefresh();
+    }
+
+    // Cleanup interval on unmount or when user logs out
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
+  }, [user, refreshToken, getAuthToken]); // Re-run when user state changes
+
+  const login = async (email: string, password: string) => {
+    try {
+      console.log('Attempting login for:', email);
+      
+      const response = await fetch('https://spendmate.shubhodip.in/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'Meowmeowmeow123456789'
+        },
+        body: JSON.stringify({
+          email,
+          password
+        }),
+      });
+
+      console.log('Login response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Login failed');
+      }
+
+      let data;
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const textResponse = await response.text();
+        throw new Error(textResponse || 'Login failed');
+      }
+
+      console.log('Login response data:', data);
+
+      // Store tokens
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('refreshToken', data.refreshToken);
+
+      // Decode JWT to get user information (basic decode, not secure verification)
+      let userFromToken;
+      try {
+        const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
+        userFromToken = {
+          id: tokenPayload.userId || tokenPayload.sub || 'unknown',
+          email: tokenPayload.email || email,
+          name: tokenPayload.name || email.split('@')[0],
+          profileComplete: false // You might get this from user profile API
+        };
+      } catch {
+        console.warn('Could not decode JWT token, using fallback user data');
+        userFromToken = {
+          id: 'user_id',
+          email,
+          name: email.split('@')[0],
+          profileComplete: false
+        };
+      }
+
+      setUser(userFromToken);
+      localStorage.setItem('user', JSON.stringify(userFromToken));
+      
+      console.log('Login successful, user set:', userFromToken);
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
   const register = async (email: string, password: string, name: string) => {
@@ -208,11 +375,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-  };
-
   const updateProfile = (data: Record<string, unknown>) => {
     if (user) {
       const updatedUser = { ...user, profileComplete: true };
@@ -224,7 +386,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, requestOTP, verifyOTPAndRegister, logout, updateProfile }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      register, 
+      requestOTP, 
+      verifyOTPAndRegister, 
+      logout, 
+      updateProfile, 
+      refreshToken, 
+      getAuthToken 
+    }}>
       {children}
     </AuthContext.Provider>
   );
