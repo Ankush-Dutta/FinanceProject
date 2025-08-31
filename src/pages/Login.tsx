@@ -1,6 +1,7 @@
 // src/pages/Login.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { LogIn, Mail, Lock } from "lucide-react";
 import Spline from "@splinetool/react-spline";
 
@@ -8,15 +9,19 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // TODO: replace with real authentication
-      await new Promise((r) => setTimeout(r, 800));
+      await login(email, password);
       navigate("/app/dashboard");
+    } catch (error: unknown) {
+      console.error("Login failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Login failed. Please check your credentials.";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
