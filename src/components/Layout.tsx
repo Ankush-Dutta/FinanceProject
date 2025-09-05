@@ -21,10 +21,8 @@ const Layout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   React.useEffect(() => {
-    if (user && !user.profileComplete && location.pathname !== '/app/profile-setup') {
-      navigate('/app/profile-setup');
-    }
-  }, [user, location.pathname, navigate]);
+    // Profile completion check is now handled in login flow
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -33,6 +31,7 @@ const Layout: React.FC = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+    { name: 'Profile', href: '/app/profile', icon: User },
     { name: 'Tax Calculator', href: '/app/tax', icon: Calculator },
     { name: 'Loan Management', href: '/app/loans', icon: CreditCard },
     { name: 'Asset Management', href: '/app/assets', icon: TrendingUp },

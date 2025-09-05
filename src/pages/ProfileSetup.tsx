@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { profileApi } from '../utils/api';
 import { User, DollarSign, Calendar, MapPin } from 'lucide-react';
 
 const ProfileSetup: React.FC = () => {
@@ -16,8 +17,51 @@ const ProfileSetup: React.FC = () => {
     dependents: '0'
   });
   const [loading, setLoading] = useState(false);
-  const { updateProfile } = useAuth();
+  const [fetchingProfile, setFetchingProfile] = useState(true);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchExistingProfile = async () => {
+      if (!user?.id) return;
+      
+      console.log('Fetching profile for user ID:', user.id);
+      
+      try {
+        const response = await profileApi.getProfile(user.id);
+        if (response) {
+          console.log('Profile found:', response);
+          // Profile exists, populate form
+          setFormData({
+            dateOfBirth: response.dateOfBirth || '',
+            occupation: response.occupation || '',
+            monthlyIncome: response.monthlyIncome?.toString() || '',
+            address: response.address || '',
+            city: response.city || '',
+            state: response.state || '',
+            zipCode: response.zipCode || '',
+            maritalStatus: response.maritalStatus || 'single',
+            dependents: response.numberOfDependents?.toString() || '0'
+          });
+          setIsUpdate(true);
+        }
+      } catch (error) {
+        // Profile doesn't exist, that's fine for new users
+        console.log('No existing profile found', error);
+        // Check if it's a 404 (profile not found) or other error
+        if (error instanceof Error && error.message.includes('404')) {
+          console.log('Profile not found - this is expected for new users');
+        } else {
+          console.error('Unexpected error fetching profile:', error);
+        }
+      } finally {
+        setFetchingProfile(false);
+      }
+    };
+
+    fetchExistingProfile();
+  }, [user?.id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -26,16 +70,84 @@ const ProfileSetup: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.id) return;
+    
+    console.log('Submitting profile for user ID:', user.id);
+    console.log('Is update:', isUpdate);
+    console.log('Form data:', formData);
+    
     setLoading(true);
     try {
+      const profileData = {
+        uid: user.id,
+        dateOfBirth: formData.dateOfBirth,
+        occupation: formData.occupation,
+        monthlyIncome: parseFloat(formData.monthlyIncome),
+        maritalStatus: formData.maritalStatus,
+        numberOfDependents: parseInt(formData.dependents),
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode
+      };
+
+      console.log('Profile data to send:', profileData);
+
+      if (isUpdate) {
+        // Update existing profile (dateOfBirth cannot be updated according to API)
+        const updateData = {
+          occupation: formData.occupation,
+          monthlyIncome: parseFloat(formData.monthlyIncome),
+          maritalStatus: formData.maritalStatus,
+          numberOfDependents: parseInt(formData.dependents),
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode
+        };
+        console.log('Sending update data:', updateData);
+        await profileApi.updateProfile(user.id, updateData);
+      } else {
+        // Create new profile
+        console.log('Creating new profile');
+        await profileApi.createProfile(profileData);
+      }
+
+      // Update local auth context
       updateProfile(formData);
       navigate('/app/dashboard');
     } catch (error) {
       console.error('Profile setup failed:', error);
+      let errorMessage = 'Failed to save profile. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('404')) {
+          errorMessage = 'Profile service is not available. Please contact support.';
+        } else if (error.message.includes('409')) {
+          errorMessage = 'Profile already exists. Please try updating instead.';
+        } else if (error.message.includes('401')) {
+          errorMessage = 'Authentication failed. Please log in again.';
+        } else if (error.message.includes('400')) {
+          errorMessage = 'Invalid profile data. Please check your inputs.';
+        }
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
+  if (fetchingProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -45,10 +157,10 @@ const ProfileSetup: React.FC = () => {
             <User className="h-6 w-6 text-white" />
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Complete Your Profile
+            {isUpdate ? 'Update Your Profile' : 'Complete Your Profile'}
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Help us personalize your finance tracking experience
+            {isUpdate ? 'Keep your financial information up to date' : 'Help us personalize your finance tracking experience'}
           </p>
         </div>
         <form className="mt-8 space-y-6 bg-white p-8 rounded-xl shadow-lg" onSubmit={handleSubmit}>
@@ -63,8 +175,9 @@ const ProfileSetup: React.FC = () => {
                   type="date"
                   id="dateOfBirth"
                   name="dateOfBirth"
-                  required
-                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  required={!isUpdate}
+                  disabled={isUpdate}
+                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                   value={formData.dateOfBirth}
                   onChange={handleInputChange}
                 />
@@ -205,7 +318,7 @@ const ProfileSetup: React.FC = () => {
               disabled={loading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Setting up profile...' : 'Complete Setup'}
+              {loading ? 'Saving profile...' : isUpdate ? 'Update Profile' : 'Complete Setup'}
             </button>
           </div>
         </form>
