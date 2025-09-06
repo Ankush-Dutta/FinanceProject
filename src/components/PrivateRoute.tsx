@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { profileApi } from '../utils/api';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -10,6 +11,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { user, getAuthToken, refreshToken, logout } = useAuth();
   const [isValidating, setIsValidating] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
 
   useEffect(() => {
     const validateAuth = async () => {
@@ -36,9 +38,27 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
           } else {
             console.log('Token refreshed successfully');
             setIsAuthenticated(true);
+            
+            // Check for profile after successful authentication
+            try {
+              await profileApi.getProfile(user.id);
+              setHasProfile(true);
+            } catch (profileError) {
+              console.log('No profile found for user:', profileError);
+              setHasProfile(false);
+            }
           }
         } else {
           setIsAuthenticated(true);
+          
+          // Check for profile after successful authentication
+          try {
+            await profileApi.getProfile(user.id);
+            setHasProfile(true);
+          } catch (profileError) {
+            console.log('No profile found for user:', profileError);
+            setHasProfile(false);
+          }
         }
       } catch (error) {
         console.error('Error validating token:', error);
@@ -64,6 +84,10 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!hasProfile) {
+    return <Navigate to="/app/profile-setup" replace />;
   }
 
   return <>{children}</>;

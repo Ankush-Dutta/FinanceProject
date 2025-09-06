@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { profileApi } from "../utils/api";
 import { LogIn, Mail, Lock } from "lucide-react";
 import Spline from "@splinetool/react-spline";
 
@@ -10,7 +9,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
@@ -18,22 +17,8 @@ const Login = () => {
     setLoading(true);
     try {
       await login(email, password);
-      
-      // Check if user has a profile
-      if (user?.id) {
-        try {
-          await profileApi.getProfile(user.id);
-          // Profile exists, go to dashboard
-          navigate("/app/dashboard");
-        } catch (error) {
-          // Profile doesn't exist, go to profile setup
-          console.log("No existing profile found, redirecting to profile setup", error);
-          navigate("/app/profile-setup");
-        }
-      } else {
-        // Fallback to dashboard if user ID is not available
-        navigate("/app/dashboard");
-      }
+      // PrivateRoute will handle profile checking and redirection
+      navigate("/app/dashboard");
     } catch (error: unknown) {
       console.error("Login failed:", error);
       const errorMessage = error instanceof Error ? error.message : "Login failed. Please check your credentials.";

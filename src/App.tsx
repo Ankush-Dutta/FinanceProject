@@ -18,7 +18,6 @@ import Insurance from "./pages/Insurance";
 import AddTransaction from "./pages/AddTransaction";
 import PrivateRoute from "./components/PrivateRoute";
 import OTPVerification from "./pages/OTPVerification";
-import { profileApi } from "./utils/api";
 
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetSuccess   = lazy(() => import("./pages/ResetSuccess"));
@@ -31,19 +30,9 @@ const AppRouter: React.FC = () => {
     const handleAutoRedirect = async () => {
       if (isLoading || !user) return;
 
-      // User is authenticated, check profile status
-      try {
-        await profileApi.getProfile(user.id);
-        // Profile exists, redirect to dashboard
-        if (window.location.pathname === '/' || window.location.pathname === '/login') {
-          navigate('/app/dashboard');
-        }
-      } catch (error) {
-        // Profile doesn't exist, redirect to profile setup
-        console.log("No existing profile found, redirecting to profile setup", error);
-        if (window.location.pathname === '/' || window.location.pathname === '/login') {
-          navigate('/app/profile-setup');
-        }
+      // User is authenticated, let PrivateRoute handle profile checking
+      if (window.location.pathname === '/' || window.location.pathname === '/login') {
+        navigate('/app/dashboard');
       }
     };
 
@@ -72,6 +61,7 @@ const AppRouter: React.FC = () => {
       <Route path="/reset-success" element={<ResetSuccess />} />
 
       {/* Protected routes */}
+      <Route path="/app/profile-setup" element={<ProfileSetup />} />
       <Route
         path="/app"
         element={
@@ -81,7 +71,6 @@ const AppRouter: React.FC = () => {
         }
       >
         <Route index element={<Dashboard />} />
-        <Route path="profile-setup" element={<ProfileSetup />} />
         <Route path="profile" element={<Profile />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="tax" element={<TaxCalculation />} />
