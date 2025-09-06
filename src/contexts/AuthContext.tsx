@@ -17,6 +17,8 @@ interface AuthContextType {
   updateProfile: (data: Record<string, unknown>) => void;
   refreshToken: () => Promise<boolean>;
   getAuthToken: () => string | null;
+  isLoading: boolean;
+  checkAutoLogin: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,16 +33,7 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('authToken');
-    
-    if (savedUser && token) {
-      setUser(JSON.parse(savedUser));
-      // You could validate the token here if needed
-    }
-  }, []);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getAuthToken = useCallback((): string | null => {
     return localStorage.getItem('authToken');
@@ -89,6 +82,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
   }, [logout]);
+
+  const checkAutoLogin = useCallback(async () => {
+    const savedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('authToken');
+    const refreshTokenValue = localStorage.getItem('refreshToken');
+    
+    if (savedUser && token) {
+      try {
+        // Validate token
+        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+        
+        if (tokenPayload.exp < currentTime) {
+          console.log('Token expired, attempting refresh...');
+          if (refreshTokenValue) {
+            const refreshed = await refreshToken();
+            if (refreshed) {
+              setUser(JSON.parse(savedUser));
+            } else {
+              // Clear invalid tokens
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('user');
+            }
+          }
+        } else {
+          setUser(JSON.parse(savedUser));
+        }
+      } catch (error) {
+        console.error('Error validating token:', error);
+        // Clear invalid data
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+      }
+    }
+    setIsLoading(false);
+  }, [refreshToken]);
+
+  useEffect(() => {
+    checkAutoLogin();
+  }, [checkAutoLogin]);
 
   // Auto refresh token every 25 minutes
   useEffect(() => {
@@ -395,7 +430,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logout, 
       updateProfile, 
       refreshToken, 
-      getAuthToken 
+      getAuthToken,
+      isLoading,
+      checkAutoLogin
     }}>
       {children}
     </AuthContext.Provider>

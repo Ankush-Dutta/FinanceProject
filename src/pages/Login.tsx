@@ -17,6 +17,7 @@ const Login = () => {
     setLoading(true);
     try {
       await login(email, password);
+      // PrivateRoute will handle profile checking and redirection
       navigate("/app/dashboard");
     } catch (error: unknown) {
       console.error("Login failed:", error);

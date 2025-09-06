@@ -111,4 +111,69 @@ class ApiClient {
   }
 }
 
+// Profile API functions
+export const profileApi = {
+  createProfile: async (profileData: {
+    uid: string;
+    dateOfBirth: string;
+    occupation: string;
+    monthlyIncome: number;
+    maritalStatus: string;
+    numberOfDependents: number;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  }) => {
+    try {
+      const response = await apiClient.post('/profiles', profileData, false); // Don't require auth
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('createProfile error:', error);
+      throw error;
+    }
+  },
+
+  getProfile: async (uid: string) => {
+    try {
+      const response = await apiClient.get(`/profiles/${uid}`, false); // Don't require auth for GET
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Profile not found');
+        }
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('getProfile error:', error);
+      throw error;
+    }
+  },
+
+  updateProfile: async (uid: string, profileData: {
+    occupation: string;
+    monthlyIncome: number;
+    maritalStatus: string;
+    numberOfDependents: number;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  }) => {
+    try {
+      const response = await apiClient.put(`/profiles/${uid}`, profileData, false); // Don't require auth
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('updateProfile error:', error);
+      throw error;
+    }
+  }
+};
+
 export const apiClient = new ApiClient();
