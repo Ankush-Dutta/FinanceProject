@@ -10,7 +10,6 @@ import Register from "./pages/Register";
 import ProfileSetup from "./pages/ProfileSetup";
 import Profile from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
-import TaxCalculation from "./pages/TaxCalculation";
 import LoanManagement from "./pages/LoanManagement";
 import AssetManagement from "./pages/AssetManagement";
 import CurrencyConverter from "./pages/CurrencyConverter";
