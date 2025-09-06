@@ -20,8 +20,6 @@ interface AuthContextType {
   getAuthToken: () => string | null;
   isLoading: boolean;
   checkAutoLogin: () => Promise<void>;
-
-  // NEW: forgot / reset password
   resetPassword: (email: string) => Promise<void>;
 }
 
