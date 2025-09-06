@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 interface User {
@@ -19,6 +20,9 @@ interface AuthContextType {
   getAuthToken: () => string | null;
   isLoading: boolean;
   checkAutoLogin: () => Promise<void>;
+
+  // NEW: forgot / reset password
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -420,6 +424,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // NEW: resetPassword implementation
+  const resetPassword = async (email: string): Promise<void> => {
+    try {
+      console.log('Requesting password reset for:', email);
+      const response = await fetch('https://spendmate.shubhodip.in/users/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'Meowmeowmeow123456789'
+        },
+        body: JSON.stringify({ email })
+      });
+
+      // Some backends respond with 200 + JSON, some with 204, handle both
+      if (!response.ok) {
+        // Try to parse JSON error, fallback to text
+        let errText = `HTTP ${response.status}`;
+        try {
+          const data = await response.json();
+          errText = data.message || JSON.stringify(data);
+        } catch {
+          try {
+            errText = await response.text();
+          } catch {
+            /* noop */
+          }
+        }
+        throw new Error(errText || 'Failed to request password reset');
+      }
+
+      // If server returns JSON success message, you may parse and return it if needed
+      console.log('Password reset request submitted successfully for', email);
+    } catch (error) {
+      console.error('Error in resetPassword:', error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -432,7 +474,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       refreshToken, 
       getAuthToken,
       isLoading,
-      checkAutoLogin
+      checkAutoLogin,
+      resetPassword // <-- exposed here
     }}>
       {children}
     </AuthContext.Provider>
